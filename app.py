@@ -317,6 +317,8 @@ def delete_avatar():
 def products():
     category_id = request.args.get('category')
     search = request.args.get('search')
+    page = request.args.get('page', 1, type=int)
+    per_page = 8
 
     query = Product.query.filter_by(is_active=True)
 
@@ -326,7 +328,7 @@ def products():
     if search:
         query = query.filter(Product.name.contains(search) | Product.description.contains(search))
 
-    products = query.order_by(Product.created_at.desc()).all()
+    products = query.order_by(Product.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
     categories = Category.query.all()
     wishlist_ids = []
     if current_user.is_authenticated:

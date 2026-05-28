@@ -21,9 +21,9 @@
 
     <div class="row">
         <div class="col-12">
-            {% if products %}
+            {% if products.items %}
             <div class="row g-4">
-                {% for product in products %}
+                {% for product in products.items %}
                 <div class="col-lg-3 col-md-4 col-6">
                     <div class="product-card card border-0 h-100">
                         <div class="product-image-wrapper">
@@ -65,6 +65,29 @@
                 </div>
                 {% endfor %}
             </div>
+
+            {% if products.pages > 1 %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {{ 'disabled' if not products.has_prev }}">
+                        <a class="page-link" href="{{ url_for('products', page=products.prev_num, category=request.args.get('category'), search=request.args.get('search')) }}">← Назад</a>
+                    </li>
+                    {% for p in products.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if p %}
+                        <li class="page-item {{ 'active' if p == products.page }}">
+                            <a class="page-link" href="{{ url_for('products', page=p, category=request.args.get('category'), search=request.args.get('search')) }}">{{ p }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {{ 'disabled' if not products.has_next }}">
+                        <a class="page-link" href="{{ url_for('products', page=products.next_num, category=request.args.get('category'), search=request.args.get('search')) }}">Вперед →</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+
             {% else %}
             <div class="text-center py-5">
                 <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
