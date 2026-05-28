@@ -437,10 +437,32 @@ def checkout():
             db.session.delete(item)
 
         db.session.commit()
-        flash('Заказ оформлен успешно!', 'success')
-        return redirect(url_for('buyer_orders'))
+        flash('Заказ оформлен! Перейдите к оплате.', 'success')
+        return redirect(url_for('payment', order_id=order.id))
 
     return render_template('checkout.html', items=items, total=total)
+
+@app.route('/payment/<int:order_id>', methods=['GET', 'POST'])
+@login_required
+def payment(order_id):
+    order = db.session.get(Order, order_id)
+    if not order or order.buyer_id != current_user.id:
+        abort(404)
+    if order.status != 'pending':
+        flash('Этот заказ уже оплачен.', 'info')
+        return redirect(url_for('order_tracking', order_id=order.id))
+
+    if request.method == 'POST':
+        order.status = 'processing'
+        tracking = OrderTracking(order_id=order.id, status='processing',
+                                 location='Оплачено онлайн',
+                                 description='Оплата получена. Заказ передан в обработку.')
+        db.session.add(tracking)
+        db.session.commit()
+        flash('Оплата прошла успешно!', 'success')
+        return redirect(url_for('order_tracking', order_id=order.id))
+
+    return render_template('payment.html', order=order)
 
 @app.route('/order/tracking/<int:order_id>')
 @login_required
