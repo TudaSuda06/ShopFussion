@@ -1,106 +1,106 @@
 ```mermaid
 erDiagram
-    User ||--o{ Product : "продаёт"
-    User ||--o{ Order : "покупает"
-    User ||--o{ WishlistItem : "добавляет"
-    User ||--o{ Review : "пишет"
-    User ||--o{ CartItem : "содержит"
+    Пользователь ||--o{ Товар : "продаёт"
+    Пользователь ||--o{ Заказ : "покупает"
+    Пользователь ||--o{ Избранное : "добавляет"
+    Пользователь ||--o{ Отзыв : "пишет"
+    Пользователь ||--o{ Корзина : "содержит"
 
-    Category ||--o{ Product : "включает"
+    Категория ||--o{ Товар : "включает"
 
-    Product ||--o{ ProductCharacteristic : "имеет"
-    Product ||--o{ CartItem : "в корзине"
-    Product ||--o{ OrderItem : "в заказе"
-    Product ||--o{ WishlistItem : "в избранном"
-    Product ||--o{ Review : "оценён"
+    Товар ||--o{ Характеристика : "имеет"
+    Товар ||--o{ Корзина : "в корзине"
+    Товар ||--o{ ЗаказаноТоваров : "в заказе"
+    Товар ||--o{ Избранное : "в избранном"
+    Товар ||--o{ Отзыв : "оценён"
 
-    Order ||--o{ OrderItem : "состоит из"
-    Order ||--o{ OrderTracking : "отслеживается"
+    Заказ ||--o{ ЗаказаноТоваров : "состоит из"
+    Заказ ||--o{ Отслеживание : "отслеживается"
 
-    User {
+    Пользователь {
         int id PK
-        string username
+        string логин
         string email
-        string password_hash
-        string role "admin | seller | buyer"
-        string avatar
-        binary avatar_data
-        datetime created_at
+        string пароль_хэш
+        string роль "admin | seller | buyer"
+        string аватар
+        binary аватар_данные
+        datetime дата_регистрации
     }
 
-    Category {
+    Категория {
         int id PK
-        string name
+        string название
     }
 
-    Product {
+    Товар {
         int id PK
-        string name
-        text description
-        float price
-        int stock
-        string image
-        binary image_data
-        int seller_id FK
-        int category_id FK
-        datetime created_at
-        bool is_active
+        string название
+        text описание
+        float цена
+        int остаток
+        string фото
+        binary фото_данные
+        int продавец_id FK
+        int категория_id FK
+        datetime дата_добавления
+        bool активен
     }
 
-    ProductCharacteristic {
+    Характеристика {
         int id PK
-        int product_id FK
-        string name "Бренд, Цвет, Размер..."
-        string value
+        int товар_id FK
+        string название "Бренд, Цвет, Размер..."
+        string значение
     }
 
-    CartItem {
+    Корзина {
         int id PK
-        int user_id FK
-        int product_id FK
-        int quantity
-        datetime created_at
+        int пользователь_id FK
+        int товар_id FK
+        int количество
+        datetime дата
     }
 
-    Order {
+    Заказ {
         int id PK
-        int buyer_id FK
-        float total
-        string status "pending | processing | shipped | completed | cancelled"
-        text address
-        datetime created_at
+        int покупатель_id FK
+        float сумма
+        string статус "pending | processing | shipped | completed | cancelled"
+        text адрес
+        datetime дата
     }
 
-    OrderItem {
+    ЗаказаноТоваров {
         int id PK
-        int order_id FK
-        int product_id FK
-        int quantity
-        float price
+        int заказ_id FK
+        int товар_id FK
+        int количество
+        float цена
     }
 
-    OrderTracking {
+    Отслеживание {
         int id PK
-        int order_id FK
-        string status
-        string location
-        string description
-        datetime created_at
+        int заказ_id FK
+        string статус
+        string локация
+        string описание
+        datetime дата
     }
 
-    WishlistItem {
+    Избранное {
         int id PK
-        int user_id FK
-        int product_id FK
-        datetime created_at
+        int пользователь_id FK
+        int товар_id FK
+        datetime дата
     }
 
-    Review {
+    Отзыв {
         int id PK
-        int user_id FK
-        int product_id FK
-        int rating "1-5"
-        text text
-        datetime created_at
+        int пользователь_id FK
+        int товар_id FK
+        int оценка "1-5"
+        text текст
+        datetime дата
     }
 ```
