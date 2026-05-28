@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+<section class="hero-section text-center text-white d-flex align-items-center justify-content-center position-relative overflow-hidden" style="min-height: 100vh;">
+    <canvas id="particles-canvas" class="position-absolute top-0 start-0 w-100 h-100"></canvas>
+    <div class="hero-overlay" style="background: linear-gradient(135deg, rgba(10,10,20,0.92) 0%, rgba(30,20,10,0.88) 50%, rgba(10,10,20,0.92) 100%);"></div>
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <h1 class="display-2 fw-bold mb-3 hero-title lh-1" style="text-shadow: 0 4px 30px rgba(0,0,0,0.5);">
+                    Добро пожаловать в<br>
+                    <span class="gradient-text" style="background: linear-gradient(135deg, #f7b731, #f5a623, #e8941a, #f7b731); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradient-shift 4s ease infinite; filter: drop-shadow(0 2px 10px rgba(247,183,49,0.3));">ShopFussion</span>
+                </h1>
+                <p class="lead mb-4 fs-4 mx-auto" style="max-width: 700px; color: rgba(255,255,255,0.75); text-shadow: 0 2px 15px rgba(0,0,0,0.3);">Откройте для себя удивительные товары от проверенных продавцов. Покупайте с уверенностью!</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{{ url_for('products') }}" class="btn btn-lg px-5 fw-bold rounded-pill shadow-lg hero-btn" style="background: linear-gradient(135deg, #f7b731, #e8941a); color: #1a1a2e; border: none;">
+                        <i class="fas fa-shopping-bag me-2"></i>Начать покупки
+                    </a>
+                    {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('register') }}" class="btn btn-lg px-5 rounded-pill hero-btn" style="border: 2px solid rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.05); backdrop-filter: blur(8px);">
+                        <i class="fas fa-user-plus me-2"></i>Создать аккаунт
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="hero-stats row mt-5 g-3 justify-content-center" style="max-width: 700px; margin: 3rem auto 0;">
+                    <div class="col-4">
+                        <div class="border-0 text-center p-3" style="border-right: 1px solid rgba(255,255,255,0.1);">
+                            <h3 class="fw-bold mb-0 text-white display-5 counter" data-target="{{ stats.users }}">0</h3>
+                            <small class="text-white-50 text-uppercase tracking-wider fs-6" style="letter-spacing: 1px;">Пользователей</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border-0 text-center p-3" style="border-right: 1px solid rgba(255,255,255,0.1);">
+                            <h3 class="fw-bold mb-0 text-white display-5 counter" data-target="{{ stats.products }}">0</h3>
+                            <small class="text-white-50 text-uppercase tracking-wider fs-6" style="letter-spacing: 1px;">Товаров</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border-0 text-center p-3">
+                            <h3 class="fw-bold mb-0 text-white display-5 counter" data-target="{{ stats.orders }}">0</h3>
+                            <small class="text-white-50 text-uppercase tracking-wider fs-6" style="letter-spacing: 1px;">Заказов</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="position-absolute bottom-0 start-0 w-100 text-center pb-4" style="z-index: 2;">
+        <a href="#categories" class="text-white-50 text-decoration-none" style="animation: bounce 2s infinite; display: inline-block;">
+            <i class="fas fa-chevron-down fa-lg"></i>
+        </a>
+    </div>
+</section>
+
+<section id="categories" class="py-5 position-relative">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-warning bg-opacity-15 rounded-pill px-4 py-2 mb-3 fs-6" style="background: rgba(247,183,49,0.25); color: #1a1a1a;">КАТЕГОРИИ</span>
+            <h2 class="fw-bold display-4 mb-2">Исследуйте <span class="gradient-text" style="background: linear-gradient(135deg, #f7b731, #e8941a); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ассортимент</span></h2>
+            <p style="color: var(--text-color); opacity: 0.65;" class="fs-5">8 категорий на любой вкус</p>
+        </div>
+        <div class="row g-3">
+            {% for cat in categories %}
+            <div class="col-md-3 col-6">
+                <a href="{{ url_for('products', category=cat.id) }}" class="text-decoration-none">
+                    <div class="category-card border-0 rounded-4 p-4 h-100 d-flex flex-column align-items-center justify-content-center text-white position-relative overflow-hidden" style="min-height: 160px; background: linear-gradient(135deg, {% if loop.index % 4 == 0 %}#667eea, #764ba2{% elif loop.index % 4 == 1 %}#f093fb, #f5576c{% elif loop.index % 4 == 2 %}#4facfe, #00f2fe{% else %}#fa709a, #fee140{% endif %});">
+                        <div class="position-absolute top-0 end-0 opacity-10" style="font-size: 6rem; transform: rotate(15deg);">
+                            <i class="fas fa-{% if loop.index % 4 == 0 %}laptop{% elif loop.index % 4 == 1 %}tshirt{% elif loop.index % 4 == 2 %}cogs{% else %}gem{% endif %}"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2 fs-3 position-relative">{{ cat.name }}</h5>
+                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1 position-relative">{{ cat_products[cat.id] }} товаров</span>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-5 features-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-warning bg-opacity-15 rounded-pill px-4 py-2 mb-3 fs-6" style="background: rgba(247,183,49,0.25); color: #1a1a1a;">НОВИНКИ</span>
+            <h2 class="fw-bold display-4 mb-1">Новые <span class="gradient-text" style="background: linear-gradient(135deg, #f7b731, #e8941a); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">поступления</span></h2>
+            <p class="fs-5 mb-0" style="color: var(--text-color); opacity: 0.65;">Свежие товары в нашем каталоге</p>
+        </div>
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-lg-3 col-md-3 col-6">
+                <div class="product-card card border-0 h-100 rounded-4 overflow-hidden shadow-sm" style="transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                    <div class="product-image-wrapper position-relative overflow-hidden" style="height: 220px;">
+                        <img src="{{ product.image|product_img }}" class="card-img-top product-img h-100 w-100" alt="{{ product.name }}" style="object-fit: cover; transition: transform 0.6s ease;">
+                        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6) 100%); opacity: 0; transition: opacity 0.4s ease;"></div>
+                        {% if product.stock <= 0 %}
+                        <span class="badge bg-danger position-absolute top-0 end-0 m-2 rounded-pill px-3 py-1">Нет в наличии</span>
+                        {% elif product.stock <= 5 %}
+                        <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2 rounded-pill px-3 py-1">Осталось {{ product.stock }}</span>
+                        {% endif %}
+                        <div class="product-actions position-absolute bottom-0 start-0 end-0 p-3 text-end" style="transform: translateY(100%); transition: transform 0.4s ease;">
+                            {% if product.stock > 0 %}
+                            {% if current_user.is_authenticated %}
+                            <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-warning btn-sm rounded-pill px-3 shadow">
+                                    <i class="fas fa-cart-plus me-1"></i>В корзину
+                                </button>
+                            </form>
+                            {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-warning btn-sm rounded-pill px-3 shadow">
+                                <i class="fas fa-cart-plus me-1"></i>В корзину
+                            </a>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <small class="text-muted">{{ product.category.name }}</small>
+                            {% if current_user.is_authenticated %}
+                            <form action="{{ url_for('wishlist_remove' if product.id in wishlist_ids else 'wishlist_add', product_id=product.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm p-0 border-0 {{ 'text-danger' if product.id in wishlist_ids else 'text-muted' }}" style="background: none; transition: all 0.2s;">
+                                    <i class="fas fa-heart fa-lg"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <h6 class="card-title fw-bold mb-1 text-dark">{{ product.name[:40] }}{% if product.name|length > 40 %}...{% endif %}</h6>
+                        <small class="text-muted mb-2"><i class="fas fa-user me-1"></i>{{ product.seller.username }}</small>
+                        <div class="mt-auto d-flex justify-content-between align-items-center pt-2">
+                            <span class="fw-bold fs-5 text-warning">{{ "%.0f"|format(product.price) }} ₽</span>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="stretched-link"></a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-5 position-relative overflow-hidden">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-warning bg-opacity-15 rounded-pill px-4 py-2 mb-3 fs-6" style="background: rgba(247,183,49,0.25); color: #1a1a1a;">ПРЕИМУЩЕСТВА</span>
+            <h2 class="fw-bold display-4 mb-2">Почему <span class="gradient-text" style="background: linear-gradient(135deg, #f7b731, #e8941a); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShopFussion</span>?</h2>
+            <p style="color: var(--text-color); opacity: 0.65;" class="fs-5">Мы делаем всё для вашего комфорта</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="feature-card border-0 rounded-4 p-4 text-center h-100 shadow-sm position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 w-100" style="height: 4px; background: linear-gradient(90deg, #f7b731, #f5a623);"></div>
+                    <div class="feature-icon rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px; background: linear-gradient(135deg, #f7b731 0%, #f5a623 100%); box-shadow: 0 8px 24px rgba(247,183,49,0.3);">
+                        <i class="fas fa-truck fa-2x text-white"></i>
+                    </div>
+                    <h6 class="fw-bold fs-5 mb-1">Быстрая доставка</h6>
+                    <small class="text-muted">Бесплатно при заказе от 5000 ₽</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-card border-0 rounded-4 p-4 text-center h-100 shadow-sm position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 w-100" style="height: 4px; background: linear-gradient(90deg, #4facfe, #00f2fe);"></div>
+                    <div class="feature-icon rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 8px 24px rgba(79,172,254,0.3);">
+                        <i class="fas fa-shield-alt fa-2x text-white"></i>
+                    </div>
+                    <h6 class="fw-bold fs-5 mb-1">Безопасная оплата</h6>
+                    <small class="text-muted">100% защита транзакций</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-card border-0 rounded-4 p-4 text-center h-100 shadow-sm position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 w-100" style="height: 4px; background: linear-gradient(90deg, #2ecc71, #27ae60);"></div>
+                    <div class="feature-icon rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); box-shadow: 0 8px 24px rgba(46,204,113,0.3);">
+                        <i class="fas fa-undo fa-2x text-white"></i>
+                    </div>
+                    <h6 class="fw-bold fs-5 mb-1">Лёгкий возврат</h6>
+                    <small class="text-muted">Возврат в течение 30 дней</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="https://vk.com/qwertlyx" target="_blank" class="text-decoration-none">
+                    <div class="feature-card border-0 rounded-4 p-4 text-center h-100 shadow-sm position-relative overflow-hidden">
+                        <div class="position-absolute top-0 start-0 w-100" style="height: 4px; background: linear-gradient(90deg, #fa709a, #f5576c);"></div>
+                        <div class="feature-icon rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px; background: linear-gradient(135deg, #fa709a 0%, #f5576c 100%); box-shadow: 0 8px 24px rgba(250,112,154,0.3);">
+                            <i class="fas fa-headset fa-2x text-white"></i>
+                        </div>
+                        <h6 class="fw-bold fs-5 mb-1">Поддержка 24/7</h6>
+                        <small class="text-muted">Всегда готовы помочь</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7 mb-4 mb-lg-0">
+                <span class="badge bg-warning bg-opacity-15 rounded-pill px-4 py-2 mb-3 fs-6" style="background: rgba(247,183,49,0.25); color: #1a1a1a;">НАЧНИТЕ ПРЯМО СЕЙЧАС</span>
+                <h2 class="fw-bold display-4 text-white mb-3">Готовы начать <span class="gradient-text" style="background: linear-gradient(135deg, #f7b731, #e8941a); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">покупки</span>?</h2>
+                <p class="fs-5 mb-4" style="color: rgba(255,255,255,0.6);">Присоединяйтесь к тысячам довольных покупателей. Регистрация занимает всего минуту!</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('products') }}" class="btn btn-lg rounded-pill px-5 fw-bold shadow-lg" style="background: linear-gradient(135deg, #f7b731, #e8941a); color: #1a1a2e; border: none;">
+                        <i class="fas fa-shopping-bag me-2"></i>Перейти к товарам
+                    </a>
+                    {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('register') }}" class="btn btn-lg rounded-pill px-5" style="border: 2px solid rgba(247,183,49,0.4); color: #f7b731; background: transparent;">
+                        <i class="fas fa-user-plus me-2"></i>Регистрация
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-5 text-center">
+                <div class="d-flex justify-content-center gap-4">
+                    <div class="text-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 80px; height: 80px; background: rgba(247,183,49,0.1); border: 2px solid rgba(247,183,49,0.3);">
+                            <i class="fas fa-users fa-2x" style="color: #f7b731;"></i>
+                        </div>
+                        <h4 class="fw-bold text-white mb-0">{{ stats.users }}+</h4>
+                        <small style="color: rgba(255,255,255,0.5);">Клиентов</small>
+                    </div>
+                    <div class="text-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 80px; height: 80px; background: rgba(247,183,49,0.1); border: 2px solid rgba(247,183,49,0.3);">
+                            <i class="fas fa-box fa-2x" style="color: #f7b731;"></i>
+                        </div>
+                        <h4 class="fw-bold text-white mb-0">{{ stats.products }}+</h4>
+                        <small style="color: rgba(255,255,255,0.5);">Товаров</small>
+                    </div>
+                    <div class="text-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 80px; height: 80px; background: rgba(247,183,49,0.1); border: 2px solid rgba(247,183,49,0.3);">
+                            <i class="fas fa-check-circle fa-2x" style="color: #f7b731;"></i>
+                        </div>
+                        <h4 class="fw-bold text-white mb-0">{{ stats.orders }}+</h4>
+                        <small style="color: rgba(255,255,255,0.5);">Заказов</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+@keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+}
+.gradient-text {
+    background-clip: text;
+    -webkit-background-clip: text;
+}
+.hero-btn {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.hero-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 35px rgba(247,183,49,0.3) !important;
+}
+.category-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+}
+.category-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important;
+}
+.feature-card {
+    transition: all 0.3s ease;
+    cursor: default;
+}
+.feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08) !important;
+}
+.product-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+}
+.product-card:hover .product-img {
+    transform: scale(1.12);
+}
+.product-card:hover .product-actions {
+    transform: translateY(0);
+}
+.product-card:hover .position-absolute.top-0.start-0.w-100.h-100 {
+    opacity: 1 !important;
+}
+.counter {
+    font-variant-numeric: tabular-nums;
+}
+.tracking-wider {
+    letter-spacing: 2px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var canvas = document.getElementById('particles-canvas');
+    if (canvas) {
+        var ctx = canvas.getContext('2d');
+        canvas.width = canvas.parentElement.offsetWidth;
+        canvas.height = canvas.parentElement.offsetHeight;
+        var particles = [];
+        for (var i = 0; i < 80; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 3 + 1,
+                dx: (Math.random() - 0.5) * 0.5,
+                dy: (Math.random() - 0.5) * 0.5,
+                o: Math.random() * 0.5 + 0.1
+            });
+        }
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < particles.length; i++) {
+                var p = particles[i];
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(247, 183, 49, ' + p.o + ')';
+                ctx.fill();
+                p.x += p.dx;
+                p.y += p.dy;
+                if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+                for (var j = i + 1; j < particles.length; j++) {
+                    var p2 = particles[j];
+                    var dist = Math.sqrt(Math.pow(p.x - p2.x, 2) + Math.pow(p.y - p2.y, 2));
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = 'rgba(247, 183, 49, ' + (0.05 * (1 - dist / 120)) + ')';
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
+        window.addEventListener('resize', function () {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+        });
+    }
+
+    var counters = document.querySelectorAll('.counter');
+    counters.forEach(function (el) {
+        var target = parseInt(el.getAttribute('data-target'));
+        var count = 0;
+        var step = Math.max(1, Math.floor(target / 60));
+        var interval = setInterval(function () {
+            count += step;
+            if (count >= target) {
+                count = target;
+                clearInterval(interval);
+            }
+            el.textContent = count;
+        }, 25);
+    });
+});
+</script>
+{% endblock %}

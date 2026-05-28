@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Редактировать товар{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-edit fa-3x text-warning mb-3"></i>
+                        <h3 class="fw-bold">Редактировать товар</h3>
+                        <p class="text-muted">Обновите информацию о товаре</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
+                        <img src="{{ product.image|product_img }}" class="rounded-3" style="width: 100px; height: 100px; object-fit: cover;">
+                        {% if product.image != 'default_product.png' %}
+                        <form action="{{ url_for('delete_product_image', product_id=product.id) }}" method="POST" onsubmit="return confirm('Удалить изображение?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash me-1"></i>Удалить фото</button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <form method="POST" action="" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-medium">Название товара</label>
+                                <input type="text" name="name" class="form-control form-control-lg" value="{{ product.name }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Категория</label>
+                                <select name="category_id" class="form-select form-select-lg" required>
+                                    {% for cat in categories %}
+                                    <option value="{{ cat.id }}" {{ 'selected' if cat.id == product.category_id }}>{{ cat.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Цена (₽)</label>
+                                <input type="number" name="price" class="form-control form-control-lg" value="{{ product.price }}" step="0.01" min="0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Количество на складе</label>
+                                <input type="number" name="stock" class="form-control form-control-lg" value="{{ product.stock }}" min="0" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Описание</label>
+                                <textarea name="description" class="form-control" rows="4" required>{{ product.description }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Изменить изображение</label>
+                                <input type="file" name="image" class="form-control form-control-lg" accept="image/*">
+                                <small class="text-muted">Оставьте пустым, чтобы оставить текущее</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Или ссылка на изображение</label>
+                                <input type="text" name="image_url" class="form-control form-control-lg" placeholder="https://example.com/photo.jpg" value="{{ product.image if product.image.startswith('http') else '' }}">
+                                <small class="text-muted">Вставьте ссылку, чтобы заменить фото</small>
+                            </div>
+
+                            <div class="col-12">
+                                <hr>
+                                <h5 class="fw-bold mb-3"><i class="fas fa-list text-warning me-2"></i>Характеристики товара</h5>
+                            </div>
+
+                            {% set chars = {'Бренд': '', 'Цвет': '', 'Размер': '', 'Вес': '', 'Материал': ''} %}
+                            {% for c in product.characteristics %}
+                                {% set _ = chars.update({c.name: c.value}) %}
+                            {% endfor %}
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Бренд</label>
+                                <input type="text" name="brand" class="form-control" placeholder="Например: Samsung" value="{{ chars.get('Бренд', '') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Цвет</label>
+                                <input type="text" name="color" class="form-control" placeholder="Например: Чёрный" value="{{ chars.get('Цвет', '') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Размер</label>
+                                <input type="text" name="size" class="form-control" placeholder="Например: 42, M" value="{{ chars.get('Размер', '') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Вес</label>
+                                <input type="text" name="weight" class="form-control" placeholder="Например: 1.5 кг" value="{{ chars.get('Вес', '') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Материал</label>
+                                <input type="text" name="material" class="form-control" placeholder="Например: Хлопок" value="{{ chars.get('Материал', '') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">&nbsp;</label>
+                                <div class="text-muted small pt-2">Оставьте пустым, если не применимо</div>
+                            </div>
+
+                            <div class="col-12">
+                                <div id="extra-chars">
+                                    <label class="form-label fw-medium">Дополнительные характеристики</label>
+                                    {% set standard = ['Бренд','Цвет','Размер','Вес','Материал'] %}
+                                    {% for c in product.characteristics %}
+                                        {% if c.name not in standard %}
+                                        <div class="row g-2 mb-2 char-row">
+                                            <div class="col-5">
+                                                <input type="text" name="char_name_{{ loop.index0 }}" class="form-control" placeholder="Название" value="{{ c.name }}">
+                                            </div>
+                                            <div class="col-5">
+                                                <input type="text" name="char_value_{{ loop.index0 }}" class="form-control" placeholder="Значение" value="{{ c.value }}">
+                                            </div>
+                                            <div class="col-2">
+                                                <button type="button" class="btn btn-outline-danger remove-char-btn w-100"><i class="fas fa-times"></i></button>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <div class="row g-2 mb-2 char-row">
+                                        <div class="col-5">
+                                            <input type="text" name="char_name_new" class="form-control" placeholder="Название (например: Страна)">
+                                        </div>
+                                        <div class="col-5">
+                                            <input type="text" name="char_value_new" class="form-control" placeholder="Значение (например: Россия)">
+                                        </div>
+                                        <div class="col-2">
+                                            <button type="button" class="btn btn-outline-success add-char-btn w-100"><i class="fas fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active" {{ 'checked' if product.is_active }}>
+                                    <label class="form-check-label fw-medium" for="is_active">Активен (виден покупателям)</label>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
+                                    <i class="fas fa-save me-2"></i>Сохранить изменения
+                                </button>
+                                <a href="{{ url_for('seller_products') }}" class="btn btn-outline-dark btn-lg w-100 mt-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Отмена
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

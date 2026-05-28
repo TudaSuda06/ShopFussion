@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-muted">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('products', category=product.category_id) }}" class="text-muted">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active">{{ product.name[:40] }}...</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <div class="col-md-5">
+            <div class="product-detail-image rounded-4 overflow-hidden shadow">
+                <img src="{{ product.image|product_img }}" class="img-fluid w-100" alt="{{ product.name }}">
+            </div>
+        </div>
+        <div class="col-md-7">
+            <span class="badge bg-warning text-dark mb-2">{{ product.category.name }}</span>
+            <h2 class="fw-bold mb-2">{{ product.name }}</h2>
+            <div class="d-flex align-items-center mb-3">
+                <span class="badge bg-light text-dark me-2"><i class="fas fa-user me-1"></i>{{ product.seller.username }}</span>
+            </div>
+            <p class="text-muted mb-4">{{ product.description }}</p>
+
+            <div class="d-flex align-items-center mb-4">
+                <span class="badge bg-{{ 'success' if product.stock > 10 else 'warning' if product.stock > 0 else 'danger' }} me-2">
+                    <i class="fas fa-{{ 'check-circle' if product.stock > 0 else 'times-circle' }} me-1"></i>
+                    {% if product.stock > 10 %}В наличии{% elif product.stock > 0 %}Осталось мало ({{ product.stock }}){% else %}Нет в наличии{% endif %}
+                </span>
+            </div>
+
+            <div class="d-flex gap-2 mb-3">
+                {% if product.stock > 0 %}
+                {% if current_user.is_authenticated %}
+                <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-warning btn-lg fw-bold px-5">
+                        <i class="fas fa-cart-plus me-2"></i>В корзину
+                    </button>
+                </form>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-warning btn-lg fw-bold px-5">
+                    <i class="fas fa-cart-plus me-2"></i>В корзину
+                </a>
+                {% endif %}
+                {% endif %}
+                {% if current_user.is_authenticated %}
+                <form action="{{ url_for('wishlist_remove' if is_wishlisted else 'wishlist_add', product_id=product.id) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-outline-{{ 'danger' if is_wishlisted else 'secondary' }} btn-lg">
+                        <i class="fas fa-{{ 'heart' if is_wishlisted else 'heart' }}"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="mt-4 p-3 bg-light rounded-3">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt me-1"></i> Безопасная сделка | 
+                    <i class="fas fa-undo me-1"></i> Возврат в течение 30 дней | 
+                    <i class="fas fa-truck me-1"></i> Бесплатная доставка от 5000 ₽
+                </small>
+            </div>
+        </div>
+    </div>
+
+    {% if product.characteristics %}
+    <hr class="my-5">
+    <h4 class="fw-bold mb-4">Характеристики <span class="text-warning">товара</span></h4>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <tbody>
+                        {% for char in product.characteristics %}
+                        <tr>
+                            <td class="fw-semibold text-muted" style="width: 40%;">{{ char.name }}</td>
+                            <td class="fw-bold">{{ char.value }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <hr class="my-5">
+    <h4 class="fw-bold mb-4">
+        Отзывы <span class="text-warning">покупателей</span>
+        {% if reviews %}
+        <small class="text-muted fs-6">({{ reviews|length }})</small>
+        <span class="ms-2">
+            {% for i in range(5) %}
+            <i class="fas fa-star {{ 'text-warning' if i < avg_rating else 'text-muted' }}"></i>
+            {% endfor %}
+            <small class="text-muted">{{ avg_rating }}</small>
+        </span>
+        {% endif %}
+    </h4>
+
+    {% if current_user.is_authenticated and current_user.role == 'buyer' %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('add_review', product_id=product.id) }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Ваша оценка</label>
+                    <div class="rating-stars">
+                        {% for i in range(5, 0, -1) %}
+                        <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}" {% if i == 5 %}checked{% endif %}>
+                        <label for="star{{ i }}" class="fas fa-star"></label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <textarea name="text" class="form-control" rows="3" placeholder="Поделитесь впечатлениями о товаре..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-warning"><i class="fas fa-pen me-2"></i>Оставить отзыв</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if reviews %}
+    <div class="mb-5">
+        {% for review in reviews %}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ review.user.avatar|avatar_img }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                        <strong>{{ review.user.username }}</strong>
+                    </div>
+                    <div>
+                        <span>
+                            {% for i in range(5) %}
+                            <i class="fas fa-star {{ 'text-warning' if i < review.rating else 'text-muted' }}"></i>
+                            {% endfor %}
+                        </span>
+                        <small class="text-muted ms-2">{{ review.created_at|rusdate('%d.%m.%Y') }}</small>
+                    </div>
+                </div>
+                {% if review.text %}
+                <p class="mb-0 text-muted">{{ review.text }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted mb-5">Пока нет отзывов. Будьте первым!</p>
+    {% endif %}
+
+    {% if related %}
+    <hr class="my-5">
+    <h4 class="fw-bold mb-4">Похожие <span class="text-warning">товары</span></h4>
+    <div class="row g-4">
+        {% for p in related %}
+        <div class="col-lg-3 col-md-4 col-6">
+            <div class="product-card card border-0 h-100">
+                <div class="product-image-wrapper">
+                    <img src="{{ p.image|product_img }}" class="card-img-top product-img" alt="{{ p.name }}">
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold mb-1">{{ p.name[:35] }}</h6>
+                    <span class="fw-bold text-warning">{{ "%.2f"|format(p.price) }} ₽</span>
+                </div>
+                <a href="{{ url_for('product_detail', product_id=p.id) }}" class="stretched-link"></a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

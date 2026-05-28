@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ShopFussion{% endblock %} | ShopFussion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <i class="fas fa-store-alt me-2"></i>Shop<span class="text-warning">Fussion</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-home"></i></a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-th-large"></i> Категории
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for cat in categories %}
+                            <li><a class="dropdown-item" href="{{ url_for('products', category=cat.id) }}">{{ cat.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('products') }}"><i class="fas fa-box"></i> Товары</a>
+                    </li>
+                </ul>
+                <form class="d-flex me-2 position-relative" action="{{ url_for('products') }}" method="GET" id="search-form">
+                    <div class="input-group">
+                        <input class="form-control form-control-sm" type="search" name="search" id="search-input" placeholder="Поиск товаров..." aria-label="Поиск" autocomplete="off">
+                        <button class="btn btn-warning btn-sm" type="submit"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div id="search-suggestions" class="dropdown-menu w-100 mt-1" style="display: none; position: absolute; top: 100%; z-index: 1000;"></div>
+                </form>
+                <ul class="navbar-nav align-items-center">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{{ url_for('wishlist') }}" title="Избранное">
+                                <i class="fas fa-heart"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{{ url_for('cart') }}">
+                                <i class="fas fa-shopping-cart"></i>
+                                {% if cart_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                                    {{ cart_count }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                <img src="{{ current_user.avatar|avatar_img }}" class="rounded-circle me-1" style="width: 26px; height: 26px; object-fit: cover;"> {{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-id-card me-2"></i>Профиль</a></li>
+                                {% if current_user.role == 'buyer' %}
+                                <li><a class="dropdown-item" href="{{ url_for('buyer_dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Панель</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('wishlist') }}"><i class="fas fa-heart me-2 text-danger"></i>Избранное</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('buyer_orders') }}"><i class="fas fa-clipboard-list me-2"></i>Мои заказы</a></li>
+                                {% elif current_user.role == 'seller' %}
+                                <li><a class="dropdown-item" href="{{ url_for('seller_dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Панель</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('seller_products') }}"><i class="fas fa-boxes me-2"></i>Мои товары</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('seller_orders') }}"><i class="fas fa-clipboard-list me-2"></i>Заказы</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin_categories') }}"><i class="fas fa-tags me-2"></i>Категории</a></li>
+                                {% elif current_user.role == 'admin' %}
+                                <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Панель</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin_users') }}"><i class="fas fa-users me-2"></i>Пользователи</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin_categories') }}"><i class="fas fa-tags me-2"></i>Категории</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin_products') }}"><i class="fas fa-boxes me-2"></i>Товары</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin_orders') }}"><i class="fas fa-clipboard-list me-2"></i>Заказы</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Выйти</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Войти</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Регистрация</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container mt-3">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark pt-5 pb-3 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold text-white"><i class="fas fa-store-alt me-2"></i>Shop<span class="text-warning">Fussion</span></h5>
+                    <p class="text-white-50">Ваш универсальный маркетплейс. Покупайте и продавайте с уверенностью.</p>
+                    <div class="social-links">
+                        <a href="https://t.me/artpo06" target="_blank" class="text-white me-3"><i class="fab fa-telegram fa-lg"></i></a>
+                        <a href="https://max.ru/u/f9LHodD0cOInfM9btUWrl3gkT055a0RwU4gwb3VU_LGhvYlHDhzKqaucy3Y" target="_blank" class="text-white me-3"><i class="fas fa-comment-dots fa-lg"></i></a>
+                        <a href="https://vk.com/qwertlyx" target="_blank" class="text-white"><i class="fab fa-vk fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6 class="fw-bold text-white">Быстрые ссылки</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('index') }}" class="text-white-50 text-decoration-none">Главная</a></li>
+                        <li><a href="{{ url_for('products') }}" class="text-white-50 text-decoration-none">Товары</a></li>
+                        <li><a href="{{ url_for('register') }}" class="text-white-50 text-decoration-none">Регистрация</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="fw-bold text-white">Категории</h6>
+                    <ul class="list-unstyled">
+                        {% for cat in categories[:4] %}
+                        <li><a href="{{ url_for('products', category=cat.id) }}" class="text-white-50 text-decoration-none">{{ cat.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="fw-bold text-white">Контакты</h6>
+                    <ul class="list-unstyled text-white-50">
+                        <li><i class="fas fa-envelope me-2"></i>artyompol06@gmail.com</li>
+                        <li><i class="fas fa-phone me-2"></i>+79512082152</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>Ижевск, Россия</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-secondary">
+            <div class="text-center text-white-50">
+                <small>&copy; 2026 ShopFussion. Все права защищены.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

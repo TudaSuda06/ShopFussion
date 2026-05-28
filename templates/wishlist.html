@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Избранное{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="fas fa-heart text-danger me-2"></i>Избранное</h2>
+            <p class="text-muted">Сохранённые товары</p>
+        </div>
+        <a href="{{ url_for('products') }}" class="btn btn-warning"><i class="fas fa-arrow-left me-2"></i>К товарам</a>
+    </div>
+
+    {% if items %}
+    <div class="row g-4">
+        {% for item in items %}
+        <div class="col-lg-3 col-md-4 col-6">
+            <div class="product-card card border-0 h-100">
+                <div class="product-image-wrapper">
+                    <img src="{{ item.product.image|product_img }}" class="card-img-top product-img" alt="{{ item.product.name }}">
+                    {% if item.product.stock <= 0 %}
+                    <span class="badge bg-danger position-absolute top-0 end-0 m-2">Нет в наличии</span>
+                    {% endif %}
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <small class="text-muted mb-1">{{ item.product.category.name }}</small>
+                    <h6 class="card-title fw-bold mb-1">{{ item.product.name[:45] }}{% if item.product.name|length > 45 %}...{% endif %}</h6>
+                    <small class="text-muted mb-2">{{ "%.2f"|format(item.product.price) }} ₽</small>
+                    <div class="mt-auto d-flex gap-2">
+                        {% if item.product.stock > 0 %}
+                        {% if current_user.is_authenticated %}
+                        <form action="{{ url_for('add_to_cart', product_id=item.product.id) }}" method="POST" class="flex-grow-1">
+                            <button type="submit" class="btn btn-warning btn-sm w-100"><i class="fas fa-cart-plus me-1"></i>В корзину</button>
+                        </form>
+                        {% endif %}
+                        {% endif %}
+                        <form action="{{ url_for('wishlist_remove', product_id=item.product.id) }}" method="POST">
+                            <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fas fa-heart-broken"></i></button>
+                        </form>
+                    </div>
+                </div>
+                <a href="{{ url_for('product_detail', product_id=item.product.id) }}" class="stretched-link"></a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-heart-broken fa-4x text-muted mb-3"></i>
+        <h4>Список избранного пуст</h4>
+        <p class="text-muted">Добавляйте товары в избранное, чтобы не потерять их.</p>
+        <a href="{{ url_for('products') }}" class="btn btn-warning btn-lg"><i class="fas fa-store me-2"></i>Перейти к товарам</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

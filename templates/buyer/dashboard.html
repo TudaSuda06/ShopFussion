@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Панель покупателя{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="fas fa-tachometer-alt text-warning me-2"></i>Панель покупателя</h2>
+            <p class="text-muted">С возвращением, {{ current_user.username }}!</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('profile') }}" class="btn btn-outline-warning"><i class="fas fa-camera me-2"></i>Фото профиля</a>
+            <a href="{{ url_for('products') }}" class="btn btn-warning"><i class="fas fa-shopping-bag me-2"></i>Каталог товаров</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-primary bg-gradient text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="fw-bold">В корзине</h6>
+                            <h2 class="fw-bold mb-0">{{ cart_items|length }}</h2>
+                        </div>
+                        <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-success bg-gradient text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="fw-bold">Заказов</h6>
+                            <h2 class="fw-bold mb-0">{{ recent_orders|length }}</h2>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-warning bg-gradient text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="fw-bold">Сумма корзины</h6>
+                            <h2 class="fw-bold mb-0">{{ "%.0f"|format(cart_items|sum(attribute='product.price')) }} ₽</h2>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-clock me-2"></i>Последние заказы</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>№ заказа</th>
+                                    <th>Сумма</th>
+                                    <th>Статус</th>
+                                    <th>Дата</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td class="fw-bold">{{ "%.2f"|format(order.total) }} ₽</td>
+                                    <td>
+                                        <span class="badge bg-{{ order.status|status_color }}">{{ order.status|status_ru }}</span>
+                                    </td>
+                                    <td><small>{{ order.created_at|rusdate('%d.%m') }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-box-open fa-3x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">Заказов пока нет</p>
+                        <a href="{{ url_for('products') }}" class="btn btn-warning btn-sm mt-2">Начать покупки</a>
+                    </div>
+                    {% endif %}
+                    <a href="{{ url_for('buyer_orders') }}" class="btn btn-outline-dark btn-sm w-100 mt-2">Все заказы</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-shopping-cart me-2"></i>Быстрые действия</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('products') }}" class="btn btn-warning btn-lg fw-bold text-start">
+                            <i class="fas fa-search me-2"></i> Каталог товаров
+                        </a>
+                        <a href="{{ url_for('cart') }}" class="btn btn-outline-dark btn-lg text-start">
+                            <i class="fas fa-shopping-cart me-2"></i> Корзина
+                            {% if cart_items|length > 0 %}
+                            <span class="badge bg-danger ms-2">{{ cart_items|length }}</span>
+                            {% endif %}
+                        </a>
+                        <a href="{{ url_for('buyer_orders') }}" class="btn btn-outline-dark btn-lg text-start">
+                            <i class="fas fa-clipboard-list me-2"></i> Мои заказы
+                        </a>
+                        <a href="{{ url_for('profile') }}" class="btn btn-outline-dark btn-lg text-start">
+                            <i class="fas fa-user me-2"></i> Профиль
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

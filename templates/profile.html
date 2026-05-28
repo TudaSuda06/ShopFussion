@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block">
+                            <img src="{{ current_user.avatar|avatar_img }}" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #f7c948;">
+                            <form action="{{ url_for('delete_avatar') }}" method="POST" class="position-absolute top-0 end-0" onsubmit="return confirm('Удалить аватар?')">
+                                <button type="submit" class="btn btn-sm btn-danger rounded-circle" style="width: 28px; height: 28px;" title="Удалить аватар"><i class="fas fa-times"></i></button>
+                            </form>
+                        </div>
+                        <h3 class="fw-bold">{{ current_user.username }}</h3>
+                        <span class="badge bg-{{ 'danger' if current_user.role == 'admin' else 'primary' if current_user.role == 'seller' else 'success' }} bg-gradient">
+                            <i class="fas fa-{{ 'shield-alt' if current_user.role == 'admin' else 'store' if current_user.role == 'seller' else 'user' }} me-1"></i>
+                            {{ 'Администратор' if current_user.role == 'admin' else 'Продавец' if current_user.role == 'seller' else 'Покупатель' }}
+                        </span>
+                    </div>
+                    <form method="POST" action="" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="fas fa-user me-2"></i>Имя пользователя</label>
+                            <input type="text" class="form-control" value="{{ current_user.username }}" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="fas fa-envelope me-2"></i>Электронная почта</label>
+                            <input type="email" name="email" class="form-control" value="{{ current_user.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="fas fa-image me-2"></i>Аватар (файл)</label>
+                            <input type="file" name="avatar" class="form-control" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="fas fa-link me-2"></i>Аватар (ссылка)</label>
+                            <input type="text" name="avatar_url" class="form-control" placeholder="https://example.com/avatar.jpg" value="{{ current_user.avatar if current_user.avatar.startswith('http') else '' }}">
+                            <small class="text-muted">Вставьте ссылку, чтобы использовать фото из интернета</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium"><i class="fas fa-calendar me-2"></i>На сайте с</label>
+                            <input type="text" class="form-control" value="{{ current_user.created_at|rusdate('%d %B %Y') }}" disabled>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100 fw-bold">
+                            <i class="fas fa-save me-2"></i>Обновить профиль
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

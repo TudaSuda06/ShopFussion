@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Добавить товар{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-plus-circle fa-3x text-warning mb-3"></i>
+                        <h3 class="fw-bold">Добавить товар</h3>
+                        <p class="text-muted">Разместите новый товар на ShopFussion</p>
+                    </div>
+                    <form method="POST" action="" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-medium">Название товара</label>
+                                <input type="text" name="name" class="form-control form-control-lg" placeholder="Введите название" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Категория</label>
+                                <select name="category_id" class="form-select form-select-lg" required>
+                                    <option value="">Выберите категорию</option>
+                                    {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Цена (₽)</label>
+                                <input type="number" name="price" class="form-control form-control-lg" placeholder="0.00" step="0.01" min="0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Количество на складе</label>
+                                <input type="number" name="stock" class="form-control form-control-lg" placeholder="0" min="0" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Описание</label>
+                                <textarea name="description" class="form-control" rows="4" placeholder="Опишите товар..." required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Изображение товара</label>
+                                <input type="file" name="image" class="form-control form-control-lg" accept="image/*">
+                                <small class="text-muted">Загрузите файл</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Или ссылка на изображение</label>
+                                <input type="text" name="image_url" class="form-control form-control-lg" placeholder="https://example.com/photo.jpg">
+                                <small class="text-muted">Вставьте ссылку, если нет файла</small>
+                            </div>
+
+                            <div class="col-12">
+                                <hr>
+                                <h5 class="fw-bold mb-3"><i class="fas fa-list text-warning me-2"></i>Характеристики товара</h5>
+                                <p class="text-muted small mb-3">Заполните основные характеристики (необязательно)</p>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Бренд</label>
+                                <input type="text" name="brand" class="form-control" placeholder="Например: Samsung">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Цвет</label>
+                                <input type="text" name="color" class="form-control" placeholder="Например: Чёрный">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Размер</label>
+                                <input type="text" name="size" class="form-control" placeholder="Например: 42, M, 15.6'">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Вес</label>
+                                <input type="text" name="weight" class="form-control" placeholder="Например: 1.5 кг">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">Материал</label>
+                                <input type="text" name="material" class="form-control" placeholder="Например: Хлопок, Металл">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-medium">&nbsp;</label>
+                                <div class="text-muted small pt-2">Оставьте пустым, если не применимо</div>
+                            </div>
+
+                            <div class="col-12">
+                                <div id="extra-chars">
+                                    <label class="form-label fw-medium">Дополнительные характеристики</label>
+                                    <div class="row g-2 mb-2 char-row">
+                                        <div class="col-5">
+                                            <input type="text" name="char_name_0" class="form-control" placeholder="Название (например: Страна)">
+                                        </div>
+                                        <div class="col-5">
+                                            <input type="text" name="char_value_0" class="form-control" placeholder="Значение (например: Россия)">
+                                        </div>
+                                        <div class="col-2">
+                                            <button type="button" class="btn btn-outline-success add-char-btn w-100"><i class="fas fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
+                                    <i class="fas fa-plus me-2"></i>Добавить товар
+                                </button>
+                                <a href="{{ url_for('seller_products') }}" class="btn btn-outline-dark btn-lg w-100 mt-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Отмена
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

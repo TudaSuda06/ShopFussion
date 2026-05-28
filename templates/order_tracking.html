@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Отслеживание заказа #{{ order.id }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-muted">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('buyer_orders') }}" class="text-muted">Мои заказы</a></li>
+            <li class="breadcrumb-item active">Заказ #{{ order.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="fas fa-truck text-warning me-2"></i>Отслеживание заказа #{{ order.id }}</h2>
+            <p class="text-muted">Статус: <span class="badge bg-{{ order.status|status_color }}">{{ order.status|status_ru }}</span></p>
+        </div>
+        <a href="{{ url_for('buyer_orders') }}" class="btn btn-outline-dark"><i class="fas fa-arrow-left me-2"></i>Назад</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4"><i class="fas fa-clock text-warning me-2"></i>История перемещений</h5>
+                    {% if order.tracking %}
+                    <div class="tracking-timeline">
+                        {% for event in order.tracking %}
+                        <div class="d-flex mb-4">
+                            <div class="timeline-icon me-3 text-center" style="width: 40px;">
+                                <div class="rounded-circle bg-{{ event.status|status_color }} d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas {{ event.status|status_icon }} text-white"></i>
+                                </div>
+                                {% if not loop.last %}
+                                <div class="timeline-line mx-auto" style="width: 2px; height: 40px; background: #e0ddd5;"></div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="fw-bold mb-1">{{ event.status|status_ru }}</h6>
+                                    <small class="text-muted">{{ event.created_at|rusdate('%d %B %Y, %H:%M') }}</small>
+                                </div>
+                                {% if event.location %}
+                                <small class="text-muted d-block"><i class="fas fa-map-marker-alt me-1"></i>{{ event.location }}</small>
+                                {% endif %}
+                                {% if event.description %}
+                                <small class="text-muted d-block">{{ event.description }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-box-open fa-3x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">Нет данных об отслеживании</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-info-circle text-warning me-2"></i>Информация</h5>
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Номер заказа</small>
+                        <span class="fw-bold">#{{ order.id }}</span>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Дата заказа</small>
+                        <span class="fw-bold">{{ order.created_at|rusdate('%d %B %Y') }}</span>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Сумма</small>
+                        <span class="fw-bold text-warning">{{ "%.2f"|format(order.total) }} ₽</span>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Адрес доставки</small>
+                        <span class="fw-bold small">{{ order.address }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-box text-warning me-2"></i>Товары</h5>
+                    {% for item in order.items %}
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="{{ item.product.image|product_img }}" class="rounded-3 me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <small class="fw-bold d-block">{{ item.product.name[:25] }}</small>
+                            <small class="text-muted">{{ item.quantity }} x {{ "%.2f"|format(item.price) }} ₽</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
