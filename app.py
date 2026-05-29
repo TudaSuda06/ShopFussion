@@ -326,9 +326,22 @@ def products():
         query = query.filter_by(category_id=int(category_id))
 
     if search:
-        query = query.filter(Product.name.contains(search) | Product.description.contains(search))
+        q = search.lower()
+        all_p = query.all()
+        filtered = [p for p in all_p if q in p.name.lower() or q in p.description.lower()]
+        total = len(filtered)
+        offset = (page - 1) * per_page
+        items = filtered[offset:offset + per_page]
+        pages = max(1, (total + per_page - 1) // per_page)
+        products = type('Paginator', (), {
+            'items': items, 'pages': pages, 'page': page,
+            'has_prev': page > 1, 'has_next': page < pages,
+            'prev_num': page - 1, 'next_num': page + 1,
+            'iter_pages': lambda self, **kw: range(1, pages + 1),
+        })()
+    else:
+        products = query.order_by(Product.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
-    products = query.order_by(Product.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
     categories = Category.query.all()
     wishlist_ids = []
     if current_user.is_authenticated:
@@ -883,7 +896,8 @@ def search_suggestions():
     q = request.args.get('q', '').strip()
     if len(q) < 2:
         return jsonify([])
-    products = Product.query.filter(Product.is_active == True, Product.name.contains(q)).limit(10).all()
+    q_lower = q.lower()
+    products = [p for p in Product.query.filter_by(is_active=True).all() if q_lower in p.name.lower()][:10]
     def img_url(p):
         if p.image and p.image.startswith(('http://', 'https://')):
             return p.image
